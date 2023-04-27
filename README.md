@@ -4,16 +4,25 @@ This is a silly little script for checking the hood availability in main TC WHD 
 
 ## Setup
 
-You'll need Python installed for this to work. A Javascript version is possible to work as a website but I am not paid enough for that 🤷.
+You'll need Python installed for this to work
 
 After installing Python, run the following commands:
 
+# Linux/MacOS
 ```bash
-python3 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
-python3 -m pip install -r requirements.txt
-python3 do_it.py
+python -m pip install -r requirements.txt
+python do_it.py
 ```
+
+ # Windows
+ ```bash
+ python -m venv .venv
+ .venv/Scripts/activate
+ python -m pip install -r requirements.txt
+ python do_it.py 
+ ```
 
 This makes a virtual environment, enters it, installs the requirements and then runs the script. If something goes wrong, email me!
 
