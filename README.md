@@ -15,7 +15,7 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt
 python do_it.py
 ```
-# Windows
+# Windows
 
 For windows a .bat file is included. Navigate to the correct folder and run
  ```bash
