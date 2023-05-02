@@ -16,12 +16,11 @@ python -m pip install -r requirements.txt
 python do_it.py
 ```
 
- # Windows
+# Windows
+
+For windows a .bat file is included. Navigate to the correct folder and run
  ```bash
- python -m venv .venv
- .venv/Scripts/activate
- python -m pip install -r requirements.txt
- python do_it.py 
+ hoods.bat
  ```
 
 This makes a virtual environment, enters it, installs the requirements and then runs the script. If something goes wrong, email me!
