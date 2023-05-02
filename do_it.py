@@ -37,9 +37,9 @@ class Hood_Availability:
         bounds = [0, 0.5, 1]
         norm = colors.BoundaryNorm(bounds, cmap.N)
 
-        for i in range(6):
+        for i in range(8):
             t = self.ax.text(
-                i % 3, i // 3, f"Hood {i + 1}", ha="center", va="center", color="white"
+                i % 4, i // 4, f"Hood {i + 1}", ha="center", va="center", color="white"
             )
             self.labels.append(t)
 
@@ -51,7 +51,7 @@ class Hood_Availability:
             for a in ["top", "bottom", "left", "right"]
         ]
 
-        self.im = self.ax.imshow(self.squares.reshape((2, 3)), cmap=cmap, norm=norm)
+        self.im = self.ax.imshow(self.squares.reshape((2, 4)), cmap=cmap, norm=norm)
 
     def get_data(self) -> str:
         login = "https://safetynet.liverpool.ac.uk/login/"
@@ -100,7 +100,7 @@ class Hood_Availability:
 
         squares, bookers = self.get_squares()
 
-        self.im.set_data(squares.reshape((2, 3)))
+        self.im.set_data(squares.reshape((2, 4)))
         self.ax.set_title("Hood Availability as of " + str(datetime.now())[:-7])
 
         for idx, booker in enumerate(bookers):
@@ -112,8 +112,8 @@ class Hood_Availability:
                 )
 
     def get_squares(self) -> tp.Tuple[npt.NDArray[np.bool_], tp.List[Booking]]:
-        squares = [True for _ in range(6)]
-        bookers = [None for _ in range(6)]
+        squares = [True for _ in range(8)]
+        bookers = [None for _ in range(8)]
         for booking in self.data:
             if not booking.available:
                 # Find the hood number
