@@ -1,0 +1,16 @@
+{
+    "grid_shape": [
+        2,
+        4
+    ],
+    "equipment": [
+        "TC Hood 1",
+        "TC Hood 2",
+        "TC Hood 3",
+        "TC Hood 4",
+        "TC Hood 5",
+        "TC Hood 6",
+        "TC Hood 7",
+        null
+    ]
+}

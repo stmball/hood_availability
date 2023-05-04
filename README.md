@@ -28,20 +28,4 @@ This makes a virtual environment, enters it, installs the requirements and then 
 
 The script asks for your username and password - these are ~~sent to me to compromise your account~~ only used temporarily in the Python script so should be perfectly safe. Don't believe me? Look at the code! That said, use at your own risk and please don't do anything stupid like use this program as part of any larger work.
 
-## FAQ
-
-* Why?
-
-Because it's a pain to login to SafteyNet just to check if all the hoods are booked in MainTC.
-
-* How?
-
-We use `twill` to login and save the data to JSON, then parse and show the plot using `matplotlib`.
-
-* Help! Something's gone wrong - the plot is lying!
-
-Email me.
-
-* Can you do this for other rooms?
-
-Email me and buy me a coffee.
+You can change the equipment montiored by changing the values in `config.json` to the equiptment codes as entered in SafetyNet. This is a bit of a pain to do because they might not be exactly the same as on the website. If you want to do this, let me know!

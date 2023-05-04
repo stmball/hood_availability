@@ -1,9 +1,10 @@
 import json
 import re
 import typing as tp
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from getpass import getpass
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,6 +16,28 @@ from twill import browser
 
 
 @dataclass
+class HoodDashboardConfig:
+    grid_shape: tp.Tuple[int, int] = (2, 4)
+    equipment: tp.List[tp.Optional[str]] = field(
+        default_factory=lambda: [
+            "TC Hood 1",
+            "TC Hood 2",
+            "TC Hood 3",
+            "TC Hood 4",
+            "TC Hood 5",
+            "TC Hood 6",
+            "TC Hood 7",
+            None,
+        ]
+    )
+
+    def __post_init__(self):
+        assert np.prod(self.grid_shape) == len(
+            self.equipment
+        ), "Number of equipment items must match grid shape"
+
+
+@dataclass
 class Booking:
     user: str
     item: str
@@ -23,23 +46,34 @@ class Booking:
     available: bool = True
 
 
-class Hood_Availability:
-    def __init__(self):
+class HoodDashboard:
+    def __init__(self, config: HoodDashboardConfig):
+        self.config = config
+        # Auth Creds
         self.username = input("Enter username:")
         self.password = getpass("Enter password:")
+
+        # Get & Parse initial data
         self.raw_data = self.get_data()
         self.data = self.parse_data()
         self.squares, self.bookers = self.get_squares()
         self.labels = []
-        self.fig, self.ax = plt.subplots()
 
+        # Initial Plotting setup
+        self.fig, self.ax = plt.subplots()
         cmap = colors.ListedColormap(["red", "green"])
         bounds = [0, 0.5, 1]
         norm = colors.BoundaryNorm(bounds, cmap.N)
 
-        for i in range(8):
+        w = self.config.grid_shape[1]
+        for i in range(np.prod(self.config.grid_shape)):
             t = self.ax.text(
-                i % 4, i // 4, f"Hood {i + 1}", ha="center", va="center", color="white"
+                i % w,
+                i // w,
+                self.config.equipment[i],
+                ha="center",
+                va="center",
+                color="white",
             )
             self.labels.append(t)
 
@@ -51,7 +85,9 @@ class Hood_Availability:
             for a in ["top", "bottom", "left", "right"]
         ]
 
-        self.im = self.ax.imshow(self.squares.reshape((2, 4)), cmap=cmap, norm=norm)
+        self.im = self.ax.imshow(
+            self.squares.reshape(self.config.grid_shape), cmap=cmap, norm=norm
+        )
 
     def get_data(self) -> str:
         login = "https://safetynet.liverpool.ac.uk/login/"
@@ -91,7 +127,7 @@ class Hood_Availability:
 
         return data
 
-    def update(self, frame: int) -> None:
+    def update(self, frame) -> None:
         if datetime.now().minute % 5 == 0 and datetime.now().second == 0:
             print("Getting data")
             self.raw_data = self.get_data()
@@ -100,32 +136,38 @@ class Hood_Availability:
 
         squares, bookers = self.get_squares()
 
-        self.im.set_data(squares.reshape((2, 4)))
-        self.ax.set_title("Hood Availability as of " + str(datetime.now())[:-7])
+        self.im.set_data(squares.reshape(self.config.grid_shape))
+        self.ax.set_title("Availability as of " + str(datetime.now())[:-7])
 
         for idx, booker in enumerate(bookers):
             if booker:
                 start_time = booker.start_time.strftime("%H:%M")
                 end_time = booker.end_time.strftime("%H:%M")
                 self.labels[idx].set_text(
-                    f"Hood {idx+1}\n{booker.user}\n{start_time}-{end_time}",
+                    f"{self.config.equipment[idx]}\n{booker.user}\n{start_time}-{end_time}",
                 )
 
     def get_squares(self) -> tp.Tuple[npt.NDArray[np.bool_], tp.List[Booking]]:
-        squares = [True for _ in range(8)]
-        bookers = [None for _ in range(8)]
+        num_squares = np.prod(self.config.grid_shape)
+        squares = [True for _ in range(num_squares)]
+        bookers = [None for _ in range(num_squares)]
         for booking in self.data:
             if not booking.available:
                 # Find the hood number
-                hood_no = re.findall(r"(?<=Hood )\d", booking.item)
-                if hood_no:
-                    index = int(hood_no[0]) - 1
+                index = self.find_hood_index(booking.item)
+                if index:
                     squares[index] = False
                     bookers[index] = booking
 
         return np.array(squares), bookers
 
-    def start_plot(self):
+    def find_hood_index(self, hood: str) -> tp.Optional[int]:
+        for idx, item in enumerate(self.config.equipment):
+            if item == hood:
+                return idx
+        return None
+
+    def start(self):
         animation = FuncAnimation(self.fig, self.update, interval=1000)
 
         plt.tight_layout()
@@ -134,5 +176,12 @@ class Hood_Availability:
 
 
 if __name__ == "__main__":
-    hood = Hood_Availability()
-    hood.start_plot()
+    if (Path(__file__).parent / "config.json").exists():
+        with open(Path(__file__).parent / "config.json") as f:
+            config = HoodDashboardConfig(**json.load(f))
+    else:
+        # Load default config for main TC
+        config = HoodDashboardConfig()
+
+    hood = HoodDashboard(config)
+    hood.start()
